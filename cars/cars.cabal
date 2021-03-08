@@ -30,6 +30,9 @@ library
       GameIO
       Types
       Draw
+      MoveCars
+      RenderCars
+      RemoveCars
   other-modules:
       Paths_cars
   hs-source-dirs:
