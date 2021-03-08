@@ -29,12 +29,18 @@ library
   exposed-modules:
       GameIO
       Types
+      Draw
+      MoveCars
+      RenderCars
+      RemoveCars
   other-modules:
       Paths_cars
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , gloss
+    , random
   default-language: Haskell2010
 
 executable cars-exe
