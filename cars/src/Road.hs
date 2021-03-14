@@ -1,6 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Road where
+module Road
+    ( Road(..)
+    , drawRoad
+    , moveCarsOnRoad
+    , renderCarsOnRoad
+    , removeCarsOnRoad)
+    where
 
 import Graphics.Gloss.Interface.IO.Game
 import RoadLane
@@ -8,7 +14,7 @@ import System.Random
 
 data Road = Road
   { randomGen :: StdGen
-  , accidentT :: Int -- время аварии (длительность)
+  , accidentT :: Float -- время аварии (длительность)
   , lateCarT :: [Int] -- сколько времени назад появилась машина в каждой полосе
   , roadLane :: [RoadLane]
   }
@@ -28,7 +34,15 @@ renderCarsOnRoad Road{..} rangeV rangeT  = subLateCarT $
   renderCars Road{..} rangeV rangeT (toCount lateCarT [1,0,-1,-2])
   where
     toCount [] _ = []
+    toCount _ [] = []
     toCount (x:xs) (n:ns) = [(x,n)] ++ toCount xs ns
+
+removeCarsOnRoad :: Road -> Road
+removeCarsOnRoad Road{..} = Road
+  randomGen
+  accidentT
+  lateCarT
+  $ map removeCarsOnRoadLane roadLane
 
 renderCars :: Road -> (Int, Int) -> (Int, Int) -> [(Int , Float)] -> Road
 renderCars road _ _ [] = road

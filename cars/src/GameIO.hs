@@ -17,7 +17,7 @@ import RoadLane
 import Car
 
 display :: Display
-display = InWindow "cars" (500, 500) (-500, -500)
+display = FullScreen --InWindow "cars" (500, 500) (-500, -500)
 
 bgColor :: Color
 bgColor = white
@@ -38,7 +38,7 @@ updateApp _ AppState {..} = return $
     --(removeCars $ renderCars $ moveCars experiment)
 
 fps :: Int
-fps = 30
+fps = 60
 
 runGame :: IO ()
 runGame = do
@@ -47,7 +47,11 @@ runGame = do
     roadLane1 = RoadLane 1 [100] []
     roadLane2 = RoadLane 0 [900] []
     roadLane3 = RoadLane (-1) [200] []
-    initRoad = Road gen 5 [0,0,0] [roadLane1, roadLane2, roadLane3]
-    initExperiment = Experiment (10, 40) (50, 100) 10 5 initRoad
+    roadLane4 = RoadLane (-2) [200] []
+    initRoad = Road gen 200 [0,0,0,0] [roadLane1, roadLane2, roadLane3, roadLane4]
+    initExperiment = Experiment (2, 10) (50, 100) 10 5 initRoad
     initState = AppState Motorway initExperiment
   playIO display bgColor fps initState drawApp handleEvent updateApp
+
+ -- скорость - разделить на 4
+ -- частота - умножить на 30

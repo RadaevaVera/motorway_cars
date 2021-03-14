@@ -1,6 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Car where
+module Car
+    ( Car(..)
+    , StatusCar(..)
+    , moveCar
+    , removeCar
+    , drawCar )
+    where
 
 import Graphics.Gloss.Interface.IO.Game
 
@@ -8,7 +14,7 @@ data Car = Car
   { v0 :: Float -- начальная скорость
   , v :: Float -- текущая скоросоть
   , x :: Float -- текущая координата
-  , t :: Float -- время простоя в аварии или приторможение
+  , t :: Float -- время простоя в аварии или искуственное приторможение
   , status :: StatusCar -- состояние машины
   }
 
@@ -22,8 +28,10 @@ moveCar Car{..}
   | (status == Accident) = accident Car{..}
   | otherwise = constantSpeed Car{..}
 
-changeStatus :: Int -> Int -> Car -> Car
-changeStatus _ _ Car{..} = Car{..}
+removeCar :: Car -> Maybe Car
+removeCar Car{..}
+  | x > 2500 = Nothing
+  | otherwise = Just Car{..}
 
 drawCar :: Car -> Float -> Picture
 drawCar Car{..} number
@@ -67,10 +75,12 @@ drawCar2 color x number = Pictures $
                             (-1000 + x, 95 + number *150)]]
 
 acceleration :: Car -> Car
-acceleration Car{..} = Car v0 (v + 6) (x + v - 3) t status
+acceleration Car{..} = Car v0 (v + 0.12) (x + v - 0.06) t status
 
 braking :: Car -> Car
-braking Car{..} = Car v0 (v - 8) (x + v - 4) t status
+braking Car{..}
+  |(v - 0.16 >= 0) = Car v0 (v - 0.16) (x + v - 0.08) t status
+  |otherwise = Car v0 0 x t status
 
 constantSpeed :: Car -> Car
 constantSpeed Car{..} = Car v0 v (x + v) t status
