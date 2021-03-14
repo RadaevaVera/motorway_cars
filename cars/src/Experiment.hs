@@ -1,6 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Experiment where
+module Experiment
+  ( Experiment(..)
+  , oneStepExperiment)
+  where
 
 import Road
 import System.Random
@@ -17,7 +20,8 @@ oneStepExperiment :: Experiment -> Experiment
 oneStepExperiment Experiment{..} =
   let
     movedRoad = moveCarsOnRoad road deltaV deltaT
-    resultRoad = renderCarsOnRoad movedRoad rangeV rangeT
+    renderedRoad = renderCarsOnRoad movedRoad rangeV rangeT
+    resultRoad = removeCarsOnRoad renderedRoad
   in
     Experiment
       rangeV
