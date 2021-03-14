@@ -1,32 +1,32 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Draw where
+module Car where
 
-import Types
-import Data.List
 import Graphics.Gloss.Interface.IO.Game
 
-drawRoad :: Road -> Picture
-drawRoad Road{..} = Pictures $ map drawRoadLane roadLane
+data Car = Car
+  { v0 :: Float -- начальная скорость
+  , v :: Float -- текущая скоросоть
+  , x :: Float -- текущая координата
+  , t :: Float -- время простоя в аварии или приторможение
+  , status :: StatusCar -- состояние машины
+  }
 
-drawRoadLane :: RoadLane -> Picture
-drawRoadLane RoadLane{..} = Pictures $
-  [Color (dark white) $ polygon [(-1000, 10 + number * 150),
-            (-1000, 150 + number * 150),
-            (1000, 150 + number * 150),
-            (1000, 10 + number *150)]]
-  ++ map (drawSlowdown number) slowdown
-  ++ map (drawCar number) car
+data StatusCar = Acceleration | Braking | ConstantSpeed | Accident | ArtificiallySlowdown deriving (Eq)
+-- Ускорение | Торможение | Постоянная скорость | Авария
 
-drawSlowdown :: Float -> Float -> Picture
-drawSlowdown number x =
-  Color white $ polygon [(-1000 + x, 70 + number * 150),
-                         (-1000 + x, 90 + number * 150),
-                         (-980 + x, 90 + number * 150),
-                         (-980 + x, 70 + number *150)]
+moveCar :: Car -> Car
+moveCar Car{..}
+  | (status == Acceleration) = acceleration Car{..}
+  | (status == Braking) = braking Car{..}
+  | (status == Accident) = accident Car{..}
+  | otherwise = constantSpeed Car{..}
 
-drawCar :: Float -> Car -> Picture
-drawCar number Car{..}
+changeStatus :: Int -> Int -> Car -> Car
+changeStatus _ _ Car{..} = Car{..}
+
+drawCar :: Car -> Float -> Picture
+drawCar Car{..} number
   | (status == Acceleration) = drawCar2 green x number
   | (status == Braking) = drawCar2 red x number
   | (status == ConstantSpeed) = drawCar2 blue x number
@@ -45,7 +45,7 @@ drawCar2 color x number = Pictures $
                           (-960 + x, 100 + number * 150),
                           (-890 + x, 100 + number * 150),
                           (-890 + x, 60 + number *150)]
-  -- вередние фонари
+  -- передние фонари
   , Color (light yellow) $
                   polygon [(-850 + x, 55 + number * 150),
                             (-850 + x, 65 + number * 150),
@@ -66,6 +66,15 @@ drawCar2 color x number = Pictures $
                             (-1000 + x, 105 + number * 150),
                             (-1000 + x, 95 + number *150)]]
 
-drawSettings :: Picture
-drawSettings =
-  polygon [(10,10), (10,-10),(-10,-10), (-10,10)]
+acceleration :: Car -> Car
+acceleration Car{..} = Car v0 (v + 6) (x + v - 3) t status
+
+braking :: Car -> Car
+braking Car{..} = Car v0 (v - 8) (x + v - 4) t status
+
+constantSpeed :: Car -> Car
+constantSpeed Car{..} = Car v0 v (x + v) t status
+
+accident :: Car -> Car
+accident Car{..} = Car v0 0 x (t + 1) status
+
