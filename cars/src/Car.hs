@@ -33,8 +33,8 @@ moveCar Car{..}
 slowdownCar :: Car -> [Float] -> Float -> Car
 slowdownCar car [] _ = car
 slowdownCar Car{..} (s:ss) deltaV
-  | abs (s - x) <= 70 && (v - deltaV) >= 0 = Car v0 (v - deltaV) x 0 ArtificiallySlowdown
-  | abs (s - x) <= 70 = Car v0 0 x 0 ArtificiallySlowdown
+  | abs (s - (x + 50)) <= 50 && (v - deltaV) >= 0 = Car v0 (v - deltaV) x 0 ArtificiallySlowdown
+  | abs (s - (x + 50)) <= 50 = Car v0 0 x 0 ArtificiallySlowdown
   | otherwise = Car{..}
 
 removeCar :: Car -> Maybe Car

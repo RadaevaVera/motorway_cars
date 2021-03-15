@@ -17,27 +17,27 @@ drawSettings (rangeV1,rangeV2) (rangeT1,rangeT2) deltaV deltaT =
     (map drawNumeralLeft [2,1,0,-1]) ++
     (map drawBash [2,1]) ++
     (map drawNumeralRidht [2,1]) ++
-    [translate (430) (70 + 2 * 150) . scale 0.2 0.2 . color black . text $ show rangeV1
-    , translate (640) (70 + 2 * 150) . scale 0.2 0.2 . color black . text $ show rangeV2
-    , translate (430) (70 + 1 * 150) . scale 0.2 0.2 . color black . text $ show rangeT1
-    , translate (640) (70 + 1 * 150) . scale 0.2 0.2 . color black . text $ show rangeT2
-    , translate (430) (70 + 0 * 150) . scale 0.2 0.2 . color black . text $ show $ round deltaV
-    , translate (430) (70 - 1 * 150) . scale 0.2 0.2 . color black . text $ show $ round deltaT] ++
+    [translate (430) (70 + 2 * 150) . scale 0.2 0.2 . color black . text $ show $ 8 * rangeV1
+    , translate (640) (70 + 2 * 150) . scale 0.2 0.2 . color black . text $ show $ 8 * rangeV2
+    , translate (430) (70 + 1 * 150) . scale 0.2 0.2 . color black . text $ show $ round $ (fromIntegral rangeT1) / 60
+    , translate (640) (70 + 1 * 150) . scale 0.2 0.2 . color black . text $ show $ round $ (fromIntegral rangeT2) / 60
+    , translate (430) (70 + 0 * 150) . scale 0.2 0.2 . color black . text $ show $ round (8 * deltaV)
+    , translate (430) (70 - 1 * 150) . scale 0.2 0.2 . color black . text $ show $ round $ deltaT / 60] ++
     [drawStart, drawExit]
   where
-    n1 = "Range of changes in cars speeds (from 10 to 120)"
-    n2 = "Range of an appearance of cars on the road (from 1 to 10)"
-    n3 = "The amount of reduction in the speed of an artificially braked car (from 10 to 120)"
-    n4 = "The time of movement of an artificially braked car at a lower speed (from 1 to 20)"
+    n1 = "Range of changes in cars speeds (from 10 to 120 km/h)"
+    n2 = "Range of an appearance of cars on the road (from 1 to 10 s)"
+    n3 = "The amount of reduction in the speed of an artificially braked car (from 10 to 120 km/h)"
+    n4 = "The time of movement of an artificially braked car at a lower speed (from 1 to 20 s)"
 
 drawName :: (Float, String) -> Picture
 drawName (number,name) = Pictures $
   [Color (dark white) $ polygon
-           [(-850, 30 + number * 150),
-            (-850, 120 + number * 150),
+           [(-920, 30 + number * 150),
+            (-920, 120 + number * 150),
             (350, 120 + number * 150),
             (350, 30 + number * 150)],
-    translate (-830) (70 + number * 150) . scale 0.2 0.2 . color black . text $ name]
+    translate (-900) (70 + number * 150) . scale 0.2 0.2 . color black . text $ name]
 
 drawNumeralLeft :: Float -> Picture
 drawNumeralLeft number = Pictures $
@@ -46,12 +46,12 @@ drawNumeralLeft number = Pictures $
              (400, 150 + number * 150),
              (550, 150 + number * 150),
              (550, 10 + number * 150)],
-      polygon [(520, 110 + number * 150),
-               (500, 140 + number * 150),
-               (540, 140 + number * 150)],
-      polygon [(500, 20 + number * 150),
-               (520, 50 + number * 150),
-               (540, 20 + number * 150)]]
+      polygon [(520, 40 + number * 150),
+               (500, 70 + number * 150),
+               (540, 70 + number * 150)],
+      polygon [(500, 90 + number * 150),
+               (520, 120 + number * 150),
+               (540, 90 + number * 150)]]
 
 drawNumeralRidht :: Float -> Picture
 drawNumeralRidht number = Pictures $
@@ -60,12 +60,12 @@ drawNumeralRidht number = Pictures $
              (610, 150 + number * 150),
              (760, 150 + number * 150),
              (760, 10 + number * 150)],
-      polygon [(730, 110 + number * 150),
-               (710, 140 + number * 150),
-               (750, 140 + number * 150)],
-      polygon [(710, 20 + number * 150),
-               (730, 50 + number * 150),
-               (750, 20 + number * 150)]]
+      polygon [(730, 40 + number * 150),
+               (710, 70 + number * 150),
+               (750, 70 + number * 150)],
+      polygon [(710, 90 + number * 150),
+               (730, 120 + number * 150),
+               (750, 90 + number * 150)]]
 
 drawBash :: Float -> Picture
 drawBash number =
