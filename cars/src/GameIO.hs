@@ -24,7 +24,7 @@ bgColor = white
 
 drawApp :: AppState -> IO Picture
 drawApp (AppState page Experiment{..})
-  | (page == Settings) = return $ drawSettings
+  | (page == Settings) = return $ drawSettings rangeV rangeT deltaV deltaT
   | otherwise = return $ drawRoad road
 
 handleEvent :: Event -> AppState -> IO AppState
