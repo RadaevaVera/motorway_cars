@@ -21,16 +21,16 @@ data RoadLane = RoadLane
 moveCarsOnRoadLane :: RoadLane -> Float -> Float -> Float -> RoadLane
 moveCarsOnRoadLane RoadLane{..} accidentT deltaV deltaT = do
   let
-    movedCars = map moveCar car
-    withoutNewSlowdown = changeCarStatus movedCars accidentT deltaT
-    resultCars = map (\ x -> slowdownCar x slowdown deltaV) withoutNewSlowdown
+    newSlowdown = map (\ x -> slowdownCar x slowdown deltaV) car
+    movedCars = map moveCar newSlowdown
+    resultCars = changeCarStatus movedCars accidentT deltaT
     resultSlowdown = removeUsedSlowdown slowdown car
   RoadLane number resultSlowdown resultCars
 
 renderCarOnRoadLane :: RoadLane -> Float -> Float -> RoadLane
 renderCarOnRoadLane RoadLane{..} n v =
   if (n == number)
-    then RoadLane number slowdown (askRender car (Car v v (-250) 0 ConstantSpeed))
+    then RoadLane number slowdown (askRender car (Car v v (-500) 0 ConstantSpeed))
     else RoadLane{..}
 
 removeCarsOnRoadLane :: RoadLane -> RoadLane
@@ -78,11 +78,11 @@ changeCarStatus ((Car v0 v x t Accident):(Car v01 v1 x1 t1 status1):xs) accident
 
 changeCarStatus ((Car v0 v x t status):(Car v01 v1 x1 t1 status1):xs) accidentT deltaT
   | (x1 - x) <= 160 = (Car v0 0 x t Accident):(Car v01 0 x1 t1 Accident):(changeCarStatus xs accidentT deltaT)
-  | (x1 - x) <= 350 && v > v1 = (Car v0 v x t Braking):end
+  | (x1 - x) <= 500 && v > v1 = (Car v0 v x t Braking):end
   | status == ArtificiallySlowdown && deltaT > t = (Car v0 v x t ArtificiallySlowdown):end
   | status == ArtificiallySlowdown && deltaT <= t = (Car v0 v x 0 Acceleration):end
-  | (x1 - x) > 350 && v0 > v = (Car v0 v x t Acceleration):end
-  | (x1 - x) > 350 && v0 <= v = (Car v0 v0 x t ConstantSpeed):end
+  | (x1 - x) > 500 && v0 > v = (Car v0 v x t Acceleration):end
+  | (x1 - x) > 500 && v0 <= v = (Car v0 v0 x t ConstantSpeed):end
   | status == Braking && v > (v1 + 1) = (Car v0 v x t Braking):end
   | status == Braking && v <= v1 = (Car v0 v1 x t ConstantSpeed):end
   | otherwise = (Car v0 v x t status): end
@@ -91,7 +91,7 @@ changeCarStatus ((Car v0 v x t status):(Car v01 v1 x1 t1 status1):xs) accidentT 
 askRender :: [Car] -> Car -> [Car]
 askRender [] newCar = [newCar]
 askRender ((Car v0 v x t status):xs) newCar
-  | x <= 100 = (Car v0 v x t status):xs
+  | x <= 0 = (Car v0 v x t status):xs
   | otherwise = newCar:(Car v0 v x t status):xs
 
 removeCars :: [Car] -> [Car]
@@ -110,5 +110,5 @@ removeUsedSlowdown sl (car:xs) =
 removeUsedSlowdown2 :: [Float] -> Car -> [Float]
 removeUsedSlowdown2 [] _ = []
 removeUsedSlowdown2 (s:ss) Car{..}
-  | abs (s - x) <= 75 = removeUsedSlowdown2 ss Car{..}
+  | abs (s - (x + 50)) <= 50 = removeUsedSlowdown2 ss Car{..}
   | otherwise = s : (removeUsedSlowdown2 ss Car{..})
