@@ -4,6 +4,7 @@ module Car
     ( Car(..)
     , StatusCar(..)
     , moveCar
+    , slowdownCar
     , removeCar
     , drawCar )
     where
@@ -26,7 +27,15 @@ moveCar Car{..}
   | (status == Acceleration) = acceleration Car{..}
   | (status == Braking) = braking Car{..}
   | (status == Accident) = accident Car{..}
+  | (status == ArtificiallySlowdown) = artificiallySlowdown Car{..}
   | otherwise = constantSpeed Car{..}
+
+slowdownCar :: Car -> [Float] -> Float -> Car
+slowdownCar car [] _ = car
+slowdownCar Car{..} (s:ss) deltaV
+  | abs (s - x) <= 70 && (v - deltaV) >= 0 = Car v0 (v - deltaV) x 0 ArtificiallySlowdown
+  | abs (s - x) <= 70 = Car v0 0 x 0 ArtificiallySlowdown
+  | otherwise = Car{..}
 
 removeCar :: Car -> Maybe Car
 removeCar Car{..}
@@ -38,6 +47,7 @@ drawCar Car{..} number
   | (status == Acceleration) = drawCar2 green x number
   | (status == Braking) = drawCar2 red x number
   | (status == ConstantSpeed) = drawCar2 blue x number
+  | (status == ArtificiallySlowdown) = drawCar2 violet x number
   | otherwise = drawCar2 black x number
 
 drawCar2 :: Color -> Float -> Float -> Picture
@@ -75,16 +85,18 @@ drawCar2 color x number = Pictures $
                             (-1000 + x, 95 + number *150)]]
 
 acceleration :: Car -> Car
-acceleration Car{..} = Car v0 (v + 0.12) (x + v - 0.06) t status
+acceleration Car{..} = Car v0 (v + 0.12) (x + v - 0.06) 0 status
 
 braking :: Car -> Car
 braking Car{..}
-  |(v - 0.16 >= 0) = Car v0 (v - 0.16) (x + v - 0.08) t status
+  |(v - 0.16 >= 0) = Car v0 (v - 0.16) (x + v - 0.08) 0 status
   |otherwise = Car v0 0 x t status
 
 constantSpeed :: Car -> Car
-constantSpeed Car{..} = Car v0 v (x + v) t status
+constantSpeed Car{..} = Car v0 v (x + v) 0 status
 
 accident :: Car -> Car
 accident Car{..} = Car v0 0 x (t + 1) status
 
+artificiallySlowdown :: Car -> Car
+artificiallySlowdown Car{..} = Car v0 v (x + v) (t + 1) status

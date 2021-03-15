@@ -2,7 +2,8 @@
 
 module Experiment
   ( Experiment(..)
-  , oneStepExperiment)
+  , oneStepExperiment
+  , addSlowdown)
   where
 
 import Road
@@ -29,3 +30,12 @@ oneStepExperiment Experiment{..} =
       deltaV
       deltaT
       resultRoad
+
+addSlowdown :: Experiment -> Float -> Float -> Experiment
+addSlowdown Experiment{..} number x =
+  Experiment
+    rangeV
+    rangeT
+    deltaV
+    deltaT
+    $ addSlowdownOnRoad road number x
