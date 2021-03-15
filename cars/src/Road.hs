@@ -5,7 +5,8 @@ module Road
     , drawRoad
     , moveCarsOnRoad
     , renderCarsOnRoad
-    , removeCarsOnRoad)
+    , removeCarsOnRoad
+    , addSlowdownOnRoad)
     where
 
 import Graphics.Gloss.Interface.IO.Game
@@ -20,14 +21,24 @@ data Road = Road
   }
 
 drawRoad :: Road -> Picture
-drawRoad Road{..} = Pictures $ map drawRoadLane roadLane
+drawRoad Road{..} = Pictures $ drawButtom : (map drawRoadLane roadLane)
+
+drawButtom :: Picture
+drawButtom = Pictures $
+  [Color (light $ light red) $
+    polygon [(-1000, 10 - 3.5 * 150),
+             (-1000, 150 - 3.5 * 150),
+             (1000, 150 - 3.5 * 150),
+             (1000, 10 - 3.5 * 150)]
+    , translate (-900) (-490) . scale 0.8 0.8 . color black . text $ "CHANGE SIMULATION PARAMETERS"]
 
 moveCarsOnRoad :: Road -> Float -> Float -> Road
-moveCarsOnRoad Road{..} deltaV deltaT = Road
-  randomGen
-  accidentT
-  lateCarT
-  (map (\ x -> moveCarsOnRoadLane x accidentT) roadLane)
+moveCarsOnRoad Road{..} dV dT =
+  Road
+    randomGen
+    accidentT
+    lateCarT
+    (map (\ x -> moveCarsOnRoadLane x accidentT dV dT) roadLane)
 
 renderCarsOnRoad :: Road -> (Int, Int) -> (Int, Int) -> Road
 renderCarsOnRoad Road{..} rangeV rangeT  = subLateCarT $
@@ -38,11 +49,20 @@ renderCarsOnRoad Road{..} rangeV rangeT  = subLateCarT $
     toCount (x:xs) (n:ns) = [(x,n)] ++ toCount xs ns
 
 removeCarsOnRoad :: Road -> Road
-removeCarsOnRoad Road{..} = Road
-  randomGen
-  accidentT
-  lateCarT
-  $ map removeCarsOnRoadLane roadLane
+removeCarsOnRoad Road{..} =
+  Road
+    randomGen
+    accidentT
+    lateCarT
+    $ map removeCarsOnRoadLane roadLane
+
+addSlowdownOnRoad :: Road -> Float -> Float -> Road
+addSlowdownOnRoad Road{..} number x =
+  Road
+    randomGen
+    accidentT
+    lateCarT
+    $ map (\ r -> addSlowdownOnRoadLane r number x) roadLane
 
 renderCars :: Road -> (Int, Int) -> (Int, Int) -> [(Int , Float)] -> Road
 renderCars road _ _ [] = road
