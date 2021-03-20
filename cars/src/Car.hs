@@ -6,7 +6,8 @@ module Car
     , moveCar
     , slowdownCar
     , removeCar
-    , drawCar )
+    , drawCar
+    , compareCar)
     where
 
 import Graphics.Gloss.Interface.IO.Game
@@ -85,7 +86,7 @@ drawCar2 color x number = Pictures $
                             (-1000 + x, 95 + number *150)]]
 
 acceleration :: Car -> Car
-acceleration Car{..} = Car v0 (v + 0.12) (x + v - 0.06) 0 status
+acceleration Car{..} = Car v0 (v + 0.08) (x + v - 0.04) 0 status
 
 braking :: Car -> Car
 braking Car{..}
@@ -100,3 +101,9 @@ accident Car{..} = Car v0 0 x (t + 1) status
 
 artificiallySlowdown :: Car -> Car
 artificiallySlowdown Car{..} = Car v0 v (x + v) (t + 1) status
+
+compareCar :: Car -> Car -> Int
+compareCar Car{..} (Car v01 v1 x1 t1 status1) =
+  if (status /= Accident && status1 == Accident)
+    then 1
+    else 0

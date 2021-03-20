@@ -10,6 +10,9 @@ data AppState = AppState
 
 data Page = Settings | Motorway deriving (Eq)
 
+drawButtoms :: Picture
+drawButtoms = Pictures [drawChange, drawExit]
+
 drawSettings :: (Int, Int) -> (Int, Int) -> Float -> Float -> Picture
 drawSettings (rangeV1,rangeV2) (rangeT1,rangeT2) deltaV deltaT =
   Pictures $
@@ -17,8 +20,8 @@ drawSettings (rangeV1,rangeV2) (rangeT1,rangeT2) deltaV deltaT =
     (map drawNumeralLeft [2,1,0,-1]) ++
     (map drawBash [2,1]) ++
     (map drawNumeralRidht [2,1]) ++
-    [translate (430) (70 + 2 * 150) . scale 0.2 0.2 . color black . text $ show $ 8 * rangeV1
-    , translate (640) (70 + 2 * 150) . scale 0.2 0.2 . color black . text $ show $ 8 * rangeV2
+    [translate (430) (70 + 2 * 150) . scale 0.2 0.2 . color black . text $ show $ 7 * rangeV1
+    , translate (640) (70 + 2 * 150) . scale 0.2 0.2 . color black . text $ show $ 7 * rangeV2
     , translate (430) (70 + 1 * 150) . scale 0.2 0.2 . color black . text $ show $ round $ (fromIntegral rangeT1) / 60
     , translate (640) (70 + 1 * 150) . scale 0.2 0.2 . color black . text $ show $ round $ (fromIntegral rangeT2) / 60
     , translate (430) (70 + 0 * 150) . scale 0.2 0.2 . color black . text $ show $ round (8 * deltaV)
@@ -83,6 +86,15 @@ drawStart = Pictures $
              (1000, 150 - 2.5 * 150),
              (1000, 10 - 2.5 * 150)]
     , translate (-150) (-340) . scale 0.8 0.8 . color black . text $ "START"]
+
+drawChange :: Picture
+drawChange = Pictures $
+  [Color (light $ light red) $
+    polygon [(-1000, 10 - 2.5 * 150),
+             (-1000, 150 - 2.5 * 150),
+             (1000, 150 - 2.5 * 150),
+             (1000, 10 - 2.5 * 150)]
+    , translate (-900) (-340) . scale 0.8 0.8 . color black . text $ "CHANGE SIMULATION PARAMETERS"]
 
 drawExit :: Picture
 drawExit = Pictures $

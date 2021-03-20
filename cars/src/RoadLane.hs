@@ -6,7 +6,8 @@ module RoadLane
     , renderCarOnRoadLane
     , removeCarsOnRoadLane
     , addSlowdownOnRoadLane
-    , drawRoadLane)
+    , drawRoadLane
+    , getNumberAccidentOnRoadLane)
     where
 
 import Car
@@ -15,6 +16,7 @@ import Graphics.Gloss.Interface.IO.Game
 data RoadLane = RoadLane
   { number :: Float -- номер полосы [-2, 1]
   , slowdown :: [Float] -- координаты замедления
+  , accident :: Int -- количество аварий
   , car :: [Car]
   }
 
@@ -25,12 +27,13 @@ moveCarsOnRoadLane RoadLane{..} accidentT deltaV deltaT = do
     movedCars = map moveCar newSlowdown
     resultCars = changeCarStatus movedCars accidentT deltaT
     resultSlowdown = removeUsedSlowdown slowdown car
-  RoadLane number resultSlowdown resultCars
+    accidentNew = accident + (compareCars car resultCars)
+  RoadLane number resultSlowdown accidentNew resultCars
 
 renderCarOnRoadLane :: RoadLane -> Float -> Float -> RoadLane
 renderCarOnRoadLane RoadLane{..} n v =
   if (n == number)
-    then RoadLane number slowdown (askRender car (Car v v (-500) 0 ConstantSpeed))
+    then RoadLane number slowdown accident (askRender car (Car v v (-500) 0 ConstantSpeed))
     else RoadLane{..}
 
 removeCarsOnRoadLane :: RoadLane -> RoadLane
@@ -38,11 +41,12 @@ removeCarsOnRoadLane RoadLane{..} =
   RoadLane
     number
     slowdown
+    accident
     (removeCars car)
 
 addSlowdownOnRoadLane :: RoadLane -> Float -> Float -> RoadLane
 addSlowdownOnRoadLane RoadLane{..} n x
-  | n == number = RoadLane number (x:slowdown) car
+  | n == number = RoadLane number (x:slowdown) accident car
   | otherwise = RoadLane{..}
 
 drawRoadLane :: RoadLane -> Picture
@@ -112,3 +116,9 @@ removeUsedSlowdown2 [] _ = []
 removeUsedSlowdown2 (s:ss) Car{..}
   | abs (s - (x + 50)) <= 50 = removeUsedSlowdown2 ss Car{..}
   | otherwise = s : (removeUsedSlowdown2 ss Car{..})
+
+getNumberAccidentOnRoadLane :: RoadLane -> Int
+getNumberAccidentOnRoadLane RoadLane{..} = accident
+
+compareCars :: [Car] -> [Car] -> Int
+compareCars car newCar = foldr (+) 0 (zipWith compareCar car newCar)
