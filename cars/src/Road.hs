@@ -3,6 +3,7 @@
 module Road
     ( Road(..)
     , drawRoad
+    , drawAccident
     , moveCarsOnRoad
     , renderCarsOnRoad
     , removeCarsOnRoad
@@ -21,16 +22,17 @@ data Road = Road
   }
 
 drawRoad :: Road -> Picture
-drawRoad Road{..} = Pictures $ drawButtom : (map drawRoadLane roadLane)
+drawRoad Road{..} = Pictures $ map drawRoadLane roadLane
 
-drawButtom :: Picture
-drawButtom = Pictures $
-  [Color (light $ light red) $
-    polygon [(-1000, 10 - 3.5 * 150),
-             (-1000, 150 - 3.5 * 150),
-             (1000, 150 - 3.5 * 150),
-             (1000, 10 - 3.5 * 150)]
-    , translate (-900) (-490) . scale 0.8 0.8 . color black . text $ "CHANGE SIMULATION PARAMETERS"]
+drawAccident :: Road -> Picture
+drawAccident Road{..} = Pictures
+  [Color (light $ light $ light $ light blue) $
+    polygon [(280, 80 + 2 * 150),
+             (280, 150 + 2 * 150),
+             (900, 150 + 2 * 150),
+             (900, 80 + 2 * 150)]
+    , translate (300) (400) . scale 0.3 0.3 . color black . text $ "NUMBER OF ACCIDENTS: "
+      ++ (show $ getNumberAccidentOnRoad roadLane)]
 
 moveCarsOnRoad :: Road -> Float -> Float -> Road
 moveCarsOnRoad Road{..} dV dT =
@@ -95,3 +97,6 @@ newLateCarT (l1:l2:late) 0 newT = (l1:newT:late)
 newLateCarT (l1:l2:l3:late) (-1) newT = (l1:l2:newT:late)
 newLateCarT (l1:l2:l3:late) (-2) newT = (l1:l2:l3:newT:late)
 newLateCarT late _ _ = late
+
+getNumberAccidentOnRoad :: [RoadLane] -> Int
+getNumberAccidentOnRoad roadLanes = foldr (+) 0 (map getNumberAccidentOnRoadLane roadLanes)
