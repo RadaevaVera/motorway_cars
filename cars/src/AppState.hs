@@ -1,4 +1,9 @@
-module AppState where
+module AppState
+  ( AppState(..)
+  , Page(..)
+  , drawButtoms
+  , drawSettings)
+  where
 
 import Experiment
 import Graphics.Gloss.Interface.IO.Game

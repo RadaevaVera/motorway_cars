@@ -1,13 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Car
-    ( Car(..)
-    , StatusCar(..)
+    ( Car
+    , getX
     , moveCar
     , slowdownCar
     , removeCar
     , drawCar
-    , compareCar)
+    , compareCar
+    , getNewCar
+    , changeLastCarStatus
+    , changeTwoCarStatus)
     where
 
 import Graphics.Gloss.Interface.IO.Game
@@ -107,3 +110,34 @@ compareCar Car{..} (Car v01 v1 x1 t1 status1) =
   if (status /= Accident && status1 == Accident)
     then 1
     else 0
+
+getX :: Car -> Float
+getX Car{..} = x
+
+getNewCar :: Float -> Car
+getNewCar v = Car v v (-500) 0 ConstantSpeed
+
+changeLastCarStatus :: Car -> Float -> Float -> Car
+changeLastCarStatus Car{..} accidentT deltaT
+  | status == Accident && t < accidentT = Car{..}
+  | status == ArtificiallySlowdown && t < deltaT = Car{..}
+  | status == ConstantSpeed = Car{..}
+  | otherwise = Car v0 v x 0 Acceleration
+
+changeTwoCarStatus :: Car -> Car -> Float -> Float -> (Car, Car, Bool)
+changeTwoCarStatus (Car v0 v x t Accident) (Car v01 v1 x1 t1 status1) accidentT deltaT
+  | (status1 == Accident) = (Car v0 v x t Accident , car2 , True)
+  | accidentT <= t && (x1 - x) >= 200 = (Car v0 v x 0 Acceleration , car2 , True)
+  | otherwise = (Car v0 v x t Accident , car2, True)
+  where car2 = Car v01 v1 x1 t1 status1
+changeTwoCarStatus (Car v0 v x t status) (Car v01 v1 x1 t1 status1) accidentT deltaT
+  | (x1 - x) <= 160 = (Car v0 0 x t Accident , Car v01 0 x1 t1 Accident, False)
+  | (x1 - x) <= 500 && v > v1 = (Car v0 v x t Braking , car2 , True)
+  | status == ArtificiallySlowdown && deltaT > t = (Car v0 v x t ArtificiallySlowdown , car2 , True)
+  | status == ArtificiallySlowdown && deltaT <= t = (Car v0 v x 0 Acceleration , car2 , True)
+  | (x1 - x) > 500 && v0 > v = (Car v0 v x t Acceleration , car2 , True)
+  | (x1 - x) > 500 && v0 <= v = (Car v0 v0 x t ConstantSpeed , car2 , True)
+  | status == Braking && v > (v1 + 1) = (Car v0 v x t Braking , car2 , True)
+  | status == Braking && v <= v1 = (Car v0 v1 x t ConstantSpeed , car2 , True)
+  | otherwise = (Car v0 v x t status , car2 , True)
+  where car2 = (Car v01 v1 x1 t1 status1)

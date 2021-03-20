@@ -33,7 +33,7 @@ moveCarsOnRoadLane RoadLane{..} accidentT deltaV deltaT = do
 renderCarOnRoadLane :: RoadLane -> Float -> Float -> RoadLane
 renderCarOnRoadLane RoadLane{..} n v =
   if (n == number)
-    then RoadLane number slowdown accident (askRender car (Car v v (-500) 0 ConstantSpeed))
+    then RoadLane number slowdown accident (askRender car (getNewCar v))
     else RoadLane{..}
 
 removeCarsOnRoadLane :: RoadLane -> RoadLane
@@ -67,36 +67,17 @@ drawSlowdown number x =
 
 changeCarStatus :: [Car] -> Float -> Float -> [Car]
 changeCarStatus [] _ _ = []
-changeCarStatus [(Car v0 v x t status)] accidentT deltaT
-  | status == Accident && t < accidentT = end
-  | status == ArtificiallySlowdown && t < deltaT = end
-  | status == ConstantSpeed = end
-  | otherwise = [(Car v0 v x 0 Acceleration)]
-  where end = [(Car v0 v x t status)]
-
-changeCarStatus ((Car v0 v x t Accident):(Car v01 v1 x1 t1 status1):xs) accidentT deltaT
-  | (status1 == Accident) = (Car v0 v x t Accident):end
-  | accidentT <= t && (x1 - x) >= 200 = (Car v0 v x 0 Acceleration):end
-  | otherwise = (Car v0 v x t Accident):end
-  where end = (changeCarStatus ((Car v01 v1 x1 t1 status1):xs) accidentT deltaT)
-
-changeCarStatus ((Car v0 v x t status):(Car v01 v1 x1 t1 status1):xs) accidentT deltaT
-  | (x1 - x) <= 160 = (Car v0 0 x t Accident):(Car v01 0 x1 t1 Accident):(changeCarStatus xs accidentT deltaT)
-  | (x1 - x) <= 500 && v > v1 = (Car v0 v x t Braking):end
-  | status == ArtificiallySlowdown && deltaT > t = (Car v0 v x t ArtificiallySlowdown):end
-  | status == ArtificiallySlowdown && deltaT <= t = (Car v0 v x 0 Acceleration):end
-  | (x1 - x) > 500 && v0 > v = (Car v0 v x t Acceleration):end
-  | (x1 - x) > 500 && v0 <= v = (Car v0 v0 x t ConstantSpeed):end
-  | status == Braking && v > (v1 + 1) = (Car v0 v x t Braking):end
-  | status == Braking && v <= v1 = (Car v0 v1 x t ConstantSpeed):end
-  | otherwise = (Car v0 v x t status): end
-  where end = (changeCarStatus ((Car v01 v1 x1 t1 status1):xs) accidentT deltaT)
+changeCarStatus [car] accidentT deltaT = [changeLastCarStatus car accidentT deltaT]
+changeCarStatus (car1:car2:xs) accidentT deltaT =
+  let (carNew1, carNew2, fl) = changeTwoCarStatus car1 car2 accidentT deltaT
+  in if (fl) then carNew1 : (changeCarStatus (carNew2:xs) accidentT deltaT)
+             else carNew1 : carNew2 : (changeCarStatus xs accidentT deltaT)
 
 askRender :: [Car] -> Car -> [Car]
 askRender [] newCar = [newCar]
-askRender ((Car v0 v x t status):xs) newCar
-  | x <= 0 = (Car v0 v x t status):xs
-  | otherwise = newCar:(Car v0 v x t status):xs
+askRender (car:xs) newCar
+  | getX car <= 0 = car:xs
+  | otherwise = newCar:car:xs
 
 removeCars :: [Car] -> [Car]
 removeCars [] = []
@@ -113,9 +94,9 @@ removeUsedSlowdown sl (car:xs) =
 
 removeUsedSlowdown2 :: [Float] -> Car -> [Float]
 removeUsedSlowdown2 [] _ = []
-removeUsedSlowdown2 (s:ss) Car{..}
-  | abs (s - (x + 50)) <= 50 = removeUsedSlowdown2 ss Car{..}
-  | otherwise = s : (removeUsedSlowdown2 ss Car{..})
+removeUsedSlowdown2 (s:ss) car
+  | abs (s - ((getX car) + 50)) <= 50 = removeUsedSlowdown2 ss car
+  | otherwise = s : (removeUsedSlowdown2 ss car)
 
 getNumberAccidentOnRoadLane :: RoadLane -> Int
 getNumberAccidentOnRoadLane RoadLane{..} = accident
