@@ -7,7 +7,8 @@ module Road
     , moveCarsOnRoad
     , renderCarsOnRoad
     , removeCarsOnRoad
-    , addSlowdownOnRoad)
+    , addSlowdownOnRoad
+    , initRoad)
     where
 
 import Graphics.Gloss.Interface.IO.Game
@@ -100,3 +101,7 @@ newLateCarT late _ _ = late
 
 getNumberAccidentOnRoad :: [RoadLane] -> Int
 getNumberAccidentOnRoad roadLanes = foldr (+) 0 (map getNumberAccidentOnRoadLane roadLanes)
+
+initRoad :: StdGen -> Road
+initRoad gen =
+  Road gen 180 [0,0,0] (map initRoadLane [1,0,-1])

@@ -1,13 +1,14 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module RoadLane
-    ( RoadLane(..)
+    ( RoadLane
     , moveCarsOnRoadLane
     , renderCarOnRoadLane
     , removeCarsOnRoadLane
     , addSlowdownOnRoadLane
     , drawRoadLane
-    , getNumberAccidentOnRoadLane)
+    , getNumberAccidentOnRoadLane
+    , initRoadLane)
     where
 
 import Car
@@ -103,3 +104,6 @@ getNumberAccidentOnRoadLane RoadLane{..} = accident
 
 compareCars :: [Car] -> [Car] -> Int
 compareCars car newCar = foldr (+) 0 (zipWith compareCar car newCar)
+
+initRoadLane :: Float -> RoadLane
+initRoadLane number = RoadLane number [] 0 []

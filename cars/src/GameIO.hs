@@ -69,15 +69,6 @@ updateApp _ AppState{..}
 fps :: Int
 fps = 60
 
-initRoad :: StdGen -> Road
-initRoad gen =
-  let
-    roadLane1 = RoadLane 1 [] 0 []
-    roadLane2 = RoadLane 0 [] 0 []
-    roadLane3 = RoadLane (-1) [] 0 []
-  in Road gen 180 [0,0,0] [roadLane1, roadLane2, roadLane3]
-
-
 runGame :: IO ()
 runGame = do
   gen <- getStdGen
