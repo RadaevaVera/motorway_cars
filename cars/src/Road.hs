@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Road
-    ( Road(..)
+    ( Road
     , drawRoad
     , drawAccident
     , moveCarsOnRoad

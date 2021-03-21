@@ -18,8 +18,8 @@ data Page = Settings | Motorway deriving (Eq)
 drawButtoms :: Picture
 drawButtoms = Pictures [drawChange, drawExit]
 
-drawSettings :: (Int, Int) -> (Int, Int) -> Float -> Float -> Picture
-drawSettings (rangeV1,rangeV2) (rangeT1,rangeT2) deltaV deltaT =
+drawSettings :: ((Int, Int) , (Int, Int) , Float , Float) -> Picture
+drawSettings ((rangeV1,rangeV2), (rangeT1,rangeT2), deltaV, deltaT) =
   Pictures $
     (map drawName [(2,n1),(1,n2),(0,n3),(-1,n4)]) ++
     (map drawNumeralLeft [2,1,0,-1]) ++
