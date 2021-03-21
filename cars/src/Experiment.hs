@@ -4,9 +4,9 @@ module Experiment
   ( Experiment
   , initExperiment
   , newExperiment
+  , drawExperiment
   , oneStepExperiment
   , addSlowdown
-  , getRoad
   , getSettings
   , addRangeV_L
   , subRangeV_L
@@ -22,6 +22,7 @@ module Experiment
   , subDeltaT)
   where
 
+import Graphics.Gloss.Interface.IO.Game
 import Road
 import System.Random
 
@@ -63,11 +64,11 @@ addSlowdown Experiment{..} number x =
     deltaT
     $ addSlowdownOnRoad road number x
 
+drawExperiment :: Experiment -> [Picture]
+drawExperiment Experiment{..} = [drawRoad road, drawAccident road]
+
 getSettings :: Experiment -> ((Int, Int), (Int, Int), Float, Float)
 getSettings Experiment{..} = (rangeV, rangeT, deltaV, deltaT)
-
-getRoad :: Experiment -> Road
-getRoad Experiment{..} = road
 
 addRangeV_L :: Experiment -> Experiment
 addRangeV_L Experiment{..} =
@@ -117,8 +118,14 @@ subDeltaT :: Experiment -> Experiment
 subDeltaT Experiment{..} =
   Experiment rangeV rangeT deltaV (deltaT - 60) road
 
-
+addL :: Int -> (Int, Int) -> (Int, Int)
 addL n (r1, r2) = (r1 + n, r2)
+
+subL :: Int -> (Int, Int) -> (Int, Int)
 subL n (r1, r2) = (r1 - n, r2)
+
+addR :: Int -> (Int, Int) -> (Int, Int)
 addR n (r1, r2) = (r1, r2 + n)
+
+subR :: Int -> (Int, Int) -> (Int, Int)
 subR n (r1, r2) = (r1, r2 - n)

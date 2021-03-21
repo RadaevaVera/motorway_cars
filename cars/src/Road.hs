@@ -75,7 +75,7 @@ renderCars (Road randomGen0 accidentT late roadLane) rangeV rangeT ((0, n):xs) =
         lateCarT = (newLateCarT late n newT)
         roadNew = renderCar Road{..} n (fromIntegral newV)
     in renderCars roadNew rangeV rangeT xs
-renderCars road rangeV rangeT (x:xs) = renderCars road rangeV rangeT xs
+renderCars road rangeV rangeT (_:xs) = renderCars road rangeV rangeT xs
 
 renderCar :: Road -> Float -> Float -> Road
 renderCar Road{..} n newV = Road
@@ -93,9 +93,9 @@ subLateCarT (Road randomGen accidentT late roadLane) =
     in Road{..}
 
 newLateCarT :: [Int] -> Float -> Int -> [Int]
-newLateCarT (l:late) 1 newT = (newT:late)
-newLateCarT (l1:l2:late) 0 newT = (l1:newT:late)
-newLateCarT (l1:l2:l3:late) (-1) newT = (l1:l2:newT:late)
+newLateCarT (_:late) 1 newT = (newT:late)
+newLateCarT (l1:_:late) 0 newT = (l1:newT:late)
+newLateCarT (l1:l2:_:late) (-1) newT = (l1:l2:newT:late)
 newLateCarT (l1:l2:l3:late) (-2) newT = (l1:l2:l3:newT:late)
 newLateCarT late _ _ = late
 

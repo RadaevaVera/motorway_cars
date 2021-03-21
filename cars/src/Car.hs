@@ -37,9 +37,12 @@ moveCar Car{..}
 slowdownCar :: Car -> [Float] -> Float -> Car
 slowdownCar car [] _ = car
 slowdownCar Car{..} (s:ss) deltaV
-  | abs (s - (x + 50)) <= 50 && (v - deltaV) >= 0 = Car v0 (v - deltaV) x 0 ArtificiallySlowdown
-  | abs (s - (x + 50)) <= 50 = Car v0 0 x 0 ArtificiallySlowdown
-  | otherwise = Car{..}
+  | abs (s - (x + 50)) <= 50 && (v - deltaV) >= 0
+    = slowdownCar (Car v0 (v - deltaV) x 0 ArtificiallySlowdown) ss deltaV
+  | abs (s - (x + 50)) <= 50
+    = Car v0 0 x 0 ArtificiallySlowdown
+  | otherwise
+    = slowdownCar Car{..} ss deltaV
 
 removeCar :: Car -> Maybe Car
 removeCar Car{..}
@@ -55,14 +58,15 @@ drawCar Car{..} number
   | otherwise = drawCar2 black x number
 
 drawCar2 :: Color -> Float -> Float -> Picture
-drawCar2 color x number = Pictures $
+drawCar2 carColor x number = Pictures $
   -- корпус
-  [ Color (dim color) $ polygon [(-1000 + x, 50 + number * 150),
+  [ Color (dim carColor) $
+                 polygon [(-1000 + x, 50 + number * 150),
                           (-1000 + x, 110 + number * 150),
                           (-850 + x, 110 + number * 150),
                           (-850 + x, 50 + number *150)]
   -- крыша
-  , Color (light $ light color) $
+  , Color (light $ light carColor) $
                  polygon [(-960 + x, 60 + number * 150),
                           (-960 + x, 100 + number * 150),
                           (-890 + x, 100 + number * 150),
@@ -106,7 +110,7 @@ artificiallySlowdown :: Car -> Car
 artificiallySlowdown Car{..} = Car v0 v (x + v) (t + 1) status
 
 compareCar :: Car -> Car -> Int
-compareCar Car{..} (Car v01 v1 x1 t1 status1) =
+compareCar Car{..} (Car _ _ _ _ status1) =
   if (status /= Accident && status1 == Accident)
     then 1
     else 0
@@ -125,12 +129,12 @@ changeLastCarStatus Car{..} accidentT deltaT
   | otherwise = Car v0 v x 0 Acceleration
 
 changeTwoCarStatus :: Car -> Car -> Float -> Float -> (Car, Car, Bool)
-changeTwoCarStatus (Car v0 v x t Accident) (Car v01 v1 x1 t1 status1) accidentT deltaT
+changeTwoCarStatus (Car v0 v x t Accident) (Car v01 v1 x1 t1 status1) accidentT _
   | (status1 == Accident) = (Car v0 v x t Accident , car2 , True)
   | accidentT <= t && (x1 - x) >= 200 = (Car v0 v x 0 Acceleration , car2 , True)
   | otherwise = (Car v0 v x t Accident , car2, True)
   where car2 = Car v01 v1 x1 t1 status1
-changeTwoCarStatus (Car v0 v x t status) (Car v01 v1 x1 t1 status1) accidentT deltaT
+changeTwoCarStatus (Car v0 v x t status) (Car v01 v1 x1 t1 status1) _ deltaT
   | (x1 - x) <= 160 = (Car v0 0 x t Accident , Car v01 0 x1 t1 Accident, False)
   | (x1 - x) <= 500 && v > v1 = (Car v0 v x t Braking , car2 , True)
   | status == ArtificiallySlowdown && deltaT > t = (Car v0 v x t ArtificiallySlowdown , car2 , True)
