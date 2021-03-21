@@ -1,11 +1,28 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Experiment
-  ( Experiment(..)
+  ( Experiment
+  , initExperiment
+  , newExperiment
+  , drawExperiment
   , oneStepExperiment
-  , addSlowdown)
+  , addSlowdown
+  , getSettings
+  , addRangeV_L
+  , subRangeV_L
+  , addRangeT_L
+  , subRangeT_L
+  , addRangeV_R
+  , subRangeV_R
+  , addRangeT_R
+  , subRangeT_R
+  , addDeltaV
+  , subDeltaV
+  , addDeltaT
+  , subDeltaT)
   where
 
+import Graphics.Gloss.Interface.IO.Game
 import Road
 import System.Random
 
@@ -31,6 +48,13 @@ oneStepExperiment Experiment{..} =
       deltaT
       resultRoad
 
+initExperiment :: StdGen -> Experiment
+initExperiment gen = Experiment (10, 15) (60, 120) 1 180 (initRoad gen)
+
+newExperiment :: Experiment -> StdGen -> Experiment
+newExperiment Experiment{..} gen =
+  Experiment rangeV rangeT deltaV deltaT (initRoad gen)
+
 addSlowdown :: Experiment -> Float -> Float -> Experiment
 addSlowdown Experiment{..} number x =
   Experiment
@@ -39,3 +63,69 @@ addSlowdown Experiment{..} number x =
     deltaV
     deltaT
     $ addSlowdownOnRoad road number x
+
+drawExperiment :: Experiment -> [Picture]
+drawExperiment Experiment{..} = [drawRoad road, drawAccident road]
+
+getSettings :: Experiment -> ((Int, Int), (Int, Int), Float, Float)
+getSettings Experiment{..} = (rangeV, rangeT, deltaV, deltaT)
+
+addRangeV_L :: Experiment -> Experiment
+addRangeV_L Experiment{..} =
+  Experiment (addL 1 rangeV) rangeT deltaV deltaT road
+
+subRangeV_L :: Experiment -> Experiment
+subRangeV_L Experiment{..} =
+  Experiment (subL 1 rangeV) rangeT deltaV deltaT road
+
+addRangeT_L :: Experiment -> Experiment
+addRangeT_L Experiment{..} =
+  Experiment rangeV (addL 60 rangeT) deltaV deltaT road
+
+subRangeT_L :: Experiment -> Experiment
+subRangeT_L Experiment{..} =
+  Experiment rangeV (subL 60 rangeT) deltaV deltaT road
+
+addRangeV_R :: Experiment -> Experiment
+addRangeV_R Experiment{..} =
+  Experiment (addR 1 rangeV) rangeT deltaV deltaT road
+
+subRangeV_R :: Experiment -> Experiment
+subRangeV_R Experiment{..} =
+  Experiment (subR 1 rangeV) rangeT deltaV deltaT road
+
+addRangeT_R :: Experiment -> Experiment
+addRangeT_R Experiment{..} =
+  Experiment rangeV (addR 60 rangeT) deltaV deltaT road
+
+subRangeT_R :: Experiment -> Experiment
+subRangeT_R Experiment{..} =
+  Experiment rangeV (subR 60 rangeT) deltaV deltaT road
+
+addDeltaV :: Experiment -> Experiment
+addDeltaV Experiment{..} =
+  Experiment rangeV rangeT (deltaV + 1) deltaT road
+
+subDeltaV :: Experiment -> Experiment
+subDeltaV Experiment{..} =
+  Experiment rangeV rangeT (deltaV - 1) deltaT road
+
+addDeltaT :: Experiment -> Experiment
+addDeltaT Experiment{..} =
+  Experiment rangeV rangeT deltaV (deltaT + 60) road
+
+subDeltaT :: Experiment -> Experiment
+subDeltaT Experiment{..} =
+  Experiment rangeV rangeT deltaV (deltaT - 60) road
+
+addL :: Int -> (Int, Int) -> (Int, Int)
+addL n (r1, r2) = (r1 + n, r2)
+
+subL :: Int -> (Int, Int) -> (Int, Int)
+subL n (r1, r2) = (r1 - n, r2)
+
+addR :: Int -> (Int, Int) -> (Int, Int)
+addR n (r1, r2) = (r1, r2 + n)
+
+subR :: Int -> (Int, Int) -> (Int, Int)
+subR n (r1, r2) = (r1, r2 - n)
